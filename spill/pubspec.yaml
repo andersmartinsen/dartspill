@@ -1,0 +1,4 @@
+name: spill
+description: Et enkelt spill med dart
+dependencies:
+  browser: any
