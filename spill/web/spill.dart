@@ -54,8 +54,8 @@ void main() {
   paddleh = 10;
   paddlew = 75;
 
-  NROWS = 5;
-  NCOLS = 5;
+  NROWS = 1;
+  NCOLS = 1;
   BRICKWIDTH = (WIDTH / NCOLS) - 1;
   BRICKHEIGHT = 15;
   PADDING = 1;
@@ -98,7 +98,6 @@ void main() {
       MediaElement treff = querySelector("#treff");
       if (treff != null) {
         treff.play();
-
       }
 
       return true;
@@ -112,9 +111,29 @@ void main() {
     return brick[col] == 1;
   }
 
+  bool alleBrikkerFjernet() {
+    return true;
+  }
+
+  void victory() {
+    ctx.fillStyle = "white";
+    ctx.font = 'italic 40pt Calibri';
+    ctx.fillText('Victory', 215, 300);
+    
+    MediaElement seier = querySelector("#seier");
+    if (seier != null) {
+      seier.play();
+    }
+
+    timer.cancel();
+  }
+
   void fjernBrick(row, col) {
     var brick = bricks[row];
     brick[col] = 0;
+    if (alleBrikkerFjernet()) {
+      victory();
+    }
   }
 
   void gameOver() {
@@ -122,13 +141,10 @@ void main() {
     if (gameover != null) {
       gameover.play();
     }
-    
+
     ctx.fillStyle = "white";
     ctx.font = 'italic 40pt Calibri';
-    ctx.fillText('Game over', 185, 
-        300);
-    
-
+    ctx.fillText('Game over', 185, 300);
     timer.cancel();
   }
 
@@ -157,7 +173,7 @@ void main() {
     // Sjekke om en brikke er truffet.
     if (y < NROWS * rowheight && row >= 0 && col >= 0 && brickHit(row, col)) {
       dy = -dy;
-      bricks[row][col] = 0;
+      fjernBrick(row, col);
     }
 
     if (x + dx + ballr > WIDTH || x + dx - ballr < 0) dx = -dx;
@@ -169,7 +185,8 @@ void main() {
       } else if (y + dy + ballr > HEIGHT) gameOver();
     }
 
-    x += dx;    y += dy;
+    x += dx;
+    y += dy;
   }
 
   timer = new Timer.periodic(const Duration(milliseconds: 5), (t) => draw());
