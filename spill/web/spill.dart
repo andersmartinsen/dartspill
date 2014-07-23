@@ -54,8 +54,8 @@ void main() {
   paddleh = 10;
   paddlew = 75;
 
-  NROWS = 1;
-  NCOLS = 1;
+  NROWS = 5;
+  NCOLS = 5;
   BRICKWIDTH = (WIDTH / NCOLS) - 1;
   BRICKHEIGHT = 15;
   PADDING = 1;
