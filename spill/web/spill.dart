@@ -2,8 +2,23 @@ import 'dart:html';
 import 'dart:math';
 import 'dart:async';
 
-void main() {
+var rightDown = false;
+var leftDown = false;
 
+void initKeyboard() {
+  void onKeyDown(evt) {
+    if (evt.keyCode == 39) rightDown = true; else if (evt.keyCode == 37) leftDown = true;
+  }
+
+  void onKeyUp(evt) {
+    if (evt.keyCode == 39) rightDown = false; else if (evt.keyCode == 37) leftDown = false;
+  }
+
+  document.onKeyDown.listen(onKeyDown);
+  document.onKeyUp.listen(onKeyUp);
+}
+
+void main() {
   var x = 150;
   var y = 150;
   var dx = 2;
@@ -15,12 +30,11 @@ void main() {
   var paddleh;
   var paddlew;
   var timer;
-  var rightDown = false;
-  var leftDown = false;
+
   var touchStartX;
   var bricks;
-  int NROWS;
-  int NCOLS;
+  var NROWS;
+  var NCOLS;
   var BRICKWIDTH;
   var BRICKHEIGHT;
   var PADDING;
@@ -29,14 +43,12 @@ void main() {
   CanvasElement canvas = querySelector("#canvas");
   ctx = canvas.getContext('2d');
 
-
   WIDTH = ctx.canvas.height;
   HEIGHT = ctx.canvas.height;
+
   ctx.rect(0, 0, WIDTH, HEIGHT);
   ctx.fillStyle = "black";
   ctx.fill();
-
-
 
   paddlex = WIDTH / 2;
   paddleh = 10;
@@ -55,43 +67,7 @@ void main() {
   }
 
 
-  //set rightDown or leftDown if the right or left keys are down
-  void onKeyDown(evt) {
-    if (evt.keyCode == 39) rightDown = true; else if (evt.keyCode == 37) leftDown = true;
-  }
-
-  //and unset them when the right or left key is released
-  void onKeyUp(evt) {
-    if (evt.keyCode == 39) rightDown = false; else if (evt.keyCode == 37) leftDown = false;
-  }
-
-  document.onKeyDown.listen(onKeyDown);
-  document.onKeyUp.listen(onKeyUp);
-
-  /*document.onTouchStart.listen((TouchEvent event) {
-    event.preventDefault();
-
-    if (event.touches.length > 0) {
-      touchStartX = event.touches[0].page.x;
-    }
-  });
-
-  document.onTouchMove.listen((TouchEvent event) {
-    event.preventDefault();
-
-    if (touchStartX != null && event.touches.length > 0) {
-      int newTouchX = event.touches[0].page.x;
-
-      if (newTouchX > touchStartX) {
-        spinFigure(target, (newTouchX - touchStartX) ~/ 20 + 1);
-        touchStartX = null;
-      } else if (newTouchX < touchStartX) {
-        spinFigure(target, (newTouchX - touchStartX) ~/ 20 - 1);
-        touchStartX = null;
-      }
-    }
-  });
-  */
+  initKeyboard();
 
   void circle(x, y, r) {
     ctx.beginPath();
@@ -122,26 +98,37 @@ void main() {
       MediaElement treff = querySelector("#treff");
       if (treff != null) {
         treff.play();
-        
+
       }
-           
+
       return true;
     }
-    
+
     return false;
   }
-  
+
   bool skalBrikkenTegnes(row, col) {
-      var brick = bricks[row];
-      return brick[col] == 1;
+    var brick = bricks[row];
+    return brick[col] == 1;
   }
 
   void fjernBrick(row, col) {
     var brick = bricks[row];
     brick[col] = 0;
   }
-  
+
   void gameOver() {
+    MediaElement gameover = querySelector("#gameover");
+    if (gameover != null) {
+      gameover.play();
+    }
+    
+    ctx.fillStyle = "white";
+    ctx.font = 'italic 40pt Calibri';
+    ctx.fillText('Game over', 185, 
+        300);
+    
+
     timer.cancel();
   }
 
@@ -152,7 +139,7 @@ void main() {
     if (rightDown) paddlex += 5; else if (leftDown) paddlex -= 5;
     rect(paddlex, HEIGHT - paddleh, paddlew, paddleh);
 
-    // draw bricks
+    // tegne brikker
     for (int i = 0; i < NROWS; i++) {
       for (int j = 0; j < NCOLS; j++) {
         if (skalBrikkenTegnes(i, j)) {
@@ -166,7 +153,8 @@ void main() {
     var colwidth = BRICKWIDTH + PADDING;
     var row = (y / rowheight).floor();
     var col = (x / colwidth).floor();
-    //reverse the ball and mark the brick as broken
+
+    // Sjekke om en brikke er truffet.
     if (y < NROWS * rowheight && row >= 0 && col >= 0 && brickHit(row, col)) {
       dy = -dy;
       bricks[row][col] = 0;
@@ -176,15 +164,13 @@ void main() {
 
     if (y + dy - ballr < 0) dy = -dy; else if (y + dy + ballr > HEIGHT - paddleh) {
       if (x > paddlex && x < paddlex + paddlew) {
-        //move the ball differently based on where it hit the paddle
         dx = 8 * ((x - (paddlex + paddlew / 2)) / paddlew);
         dy = -dy;
       } else if (y + dy + ballr > HEIGHT) gameOver();
     }
 
-    x += dx;
-    y += dy;
+    x += dx;    y += dy;
   }
 
-  timer = new Timer.periodic(const Duration(milliseconds: 10), (t) => draw());
+  timer = new Timer.periodic(const Duration(milliseconds: 5), (t) => draw());
 }
