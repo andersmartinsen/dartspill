@@ -2,23 +2,9 @@ import 'dart:html';
 import 'dart:math';
 import 'dart:async';
 
-var rightDown = false;
-var leftDown = false;
-
-void initKeyboard() {
-  void onKeyDown(evt) {
-    if (evt.keyCode == 39) rightDown = true; else if (evt.keyCode == 37) leftDown = true;
-  }
-
-  void onKeyUp(evt) {
-    if (evt.keyCode == 39) rightDown = false; else if (evt.keyCode == 37) leftDown = false;
-  }
-
-  document.onKeyDown.listen(onKeyDown);
-  document.onKeyUp.listen(onKeyUp);
-}
 
 void main() {
+  const hastighet = 10;
   var x = 150;
   var y = 150;
   var dx = 2;
@@ -30,8 +16,6 @@ void main() {
   var paddleh;
   var paddlew;
   var timer;
-
-  var touchStartX;
   var bricks;
   var NROWS;
   var NCOLS;
@@ -39,7 +23,10 @@ void main() {
   var BRICKHEIGHT;
   var PADDING;
   var ballr = 10;
+  var rightDown = false;
+  var leftDown = false;
   var rowcolors = ["#FF1C0A", "#FFFD0A", "#00A308", "#0008DB", "#EB0093"];
+
   CanvasElement canvas = querySelector("#canvas");
   ctx = canvas.getContext('2d');
 
@@ -60,19 +47,25 @@ void main() {
   BRICKHEIGHT = 15;
   PADDING = 1;
 
-
   bricks = new List(NROWS);
   for (int i = 0; i < NROWS; i++) {
     bricks[i] = new List<int>.filled(NCOLS, 1);
   }
 
+  void onKeyDown(evt) {
+    if (evt.keyCode == 39) rightDown = true; else if (evt.keyCode == 37) leftDown = true;
+  }
 
-  initKeyboard();
+  void onKeyUp(evt) {
+    if (evt.keyCode == 39) rightDown = false; else if (evt.keyCode == 37) leftDown = false;
+  }
+
+  document.onKeyDown.listen(onKeyDown);
+  document.onKeyUp.listen(onKeyUp);
 
   void circle(x, y, r) {
     ctx.beginPath();
     ctx.arc(x, y, r, 0, PI * 2, true);
-    //ctx.strokeStyle(ballcolor);
     ctx.fillStyle = "white";
     ctx.closePath();
     ctx.fill();
@@ -112,6 +105,15 @@ void main() {
   }
 
   bool alleBrikkerFjernet() {
+    for (int i = 0; i < NROWS; i++) {
+      var rad = bricks[i];
+      for (int j = 0; j < NCOLS; j++) {
+        if (rad[j] == 1) {
+          return false;
+        }
+      }
+    }
+    
     return true;
   }
 
@@ -119,7 +121,7 @@ void main() {
     ctx.fillStyle = "white";
     ctx.font = 'italic 40pt Calibri';
     ctx.fillText('Victory', 215, 300);
-    
+
     MediaElement seier = querySelector("#seier");
     if (seier != null) {
       seier.play();
@@ -148,14 +150,11 @@ void main() {
     timer.cancel();
   }
 
-  void draw() {
-    clear();
+  void tegnBall() {
     circle(x, y, 10);
+  }
 
-    if (rightDown) paddlex += 5; else if (leftDown) paddlex -= 5;
-    rect(paddlex, HEIGHT - paddleh, paddlew, paddleh);
-
-    // tegne brikker
+  void initBrikker() {
     for (int i = 0; i < NROWS; i++) {
       for (int j = 0; j < NCOLS; j++) {
         if (skalBrikkenTegnes(i, j)) {
@@ -164,6 +163,23 @@ void main() {
         }
       }
     }
+  }
+
+  void flyttPadle() {
+    if (rightDown) {
+      paddlex += 5;
+    } else if (leftDown) {
+      paddlex -= 5;
+    }
+
+    rect(paddlex, HEIGHT - paddleh, paddlew, paddleh);
+  }
+
+  void draw() {
+    clear();
+    tegnBall();
+    flyttPadle();
+    initBrikker();
 
     var rowheight = BRICKHEIGHT + PADDING;
     var colwidth = BRICKWIDTH + PADDING;
@@ -189,5 +205,5 @@ void main() {
     y += dy;
   }
 
-  timer = new Timer.periodic(const Duration(milliseconds: 5), (t) => draw());
+  timer = new Timer.periodic(const Duration(milliseconds: hastighet), (t) => draw());
 }
