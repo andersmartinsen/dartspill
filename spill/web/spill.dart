@@ -28,9 +28,13 @@ void main() {
   var rowcolors = ["#FF1C0A", "#FFFD0A", "#00A308", "#0008DB", "#EB0093"];
   MediaElement treff;
   Stopwatch stopwatch = new Stopwatch()..start();
+  Storage localStorage = window.localStorage;
 
   DivElement seier = querySelector("#highscore");
   seier.style.display = "none";
+
+  DivElement personalia = querySelector("#personalia");
+  personalia.style.display = "none";
 
   CanvasElement canvas = querySelector("#canvas");
   ctx = canvas.getContext('2d');
@@ -121,10 +125,9 @@ void main() {
     return true;
   }
 
-  void haandtereHighscoreLista() {
+  void haandtereHighscoreLista(String navn) {
     stopwatch.stop();
     Duration varighet = stopwatch.elapsed;
-    Storage localStorage = window.localStorage;
 
     String forsteTid = localStorage['forsteTid'];
     String andreTid = localStorage['andreTid'];
@@ -132,34 +135,79 @@ void main() {
 
     if (forsteTid == null) {
       localStorage['forsteTid'] = varighet.inSeconds.toString();
+      localStorage['forsteNavn'] = navn;
     } else if (forsteTid != null && varighet.inSeconds < int.parse(forsteTid)) {
       localStorage['forsteTid'] = varighet.inSeconds.toString();
+      localStorage['forsteNavn'] = navn;
     } else if (andreTid == null) {
       localStorage['andreTid'] = varighet.inSeconds.toString();
+      localStorage['andreNavn'] = navn;
     } else if (andreTid != null && varighet.inSeconds < int.parse(andreTid)) {
       localStorage['andreTid'] = varighet.inSeconds.toString();
+      localStorage['andreNavn'] = navn;
     } else if (tredjeTid == null) {
       localStorage['tredjeTid'] = varighet.inSeconds.toString();
+      localStorage['tredjeNavn'] = navn;
     } else if (tredjeTid != null && varighet.inSeconds < int.parse(tredjeTid)) {
       localStorage['tredjeTid'] = varighet.inSeconds.toString();
+      localStorage['tredjeNavn'] = navn;
     }
 
     if (localStorage['forsteTid'] != null) {
       LIElement forste = querySelector('#forste');
-      forste.text = localStorage['forsteTid'] + "s";
+      forste.text = localStorage['forsteNavn'] + " - " + localStorage['forsteTid'] + "s";
     }
 
     if (localStorage['andreTid'] != null) {
       LIElement andre = querySelector('#andre');
-      andre.text = localStorage['andreTid'] + "s";
+      andre.text = localStorage['andreNavn'] + " - " + localStorage['andreTid'] + "s";
     }
 
     if (localStorage['tredjeTid'] != null) {
       LIElement tredje = querySelector('#tredje');
-      tredje.text = localStorage['tredjeTid'] + "s";
+      tredje.text = localStorage['tredjeNavn'] + " - " + localStorage['tredjeTid'] + "s";
     }
 
     seier.style.display = "block";
+  }
+
+  bool spillerenSkalPaaHighscoreLista() {
+    Duration varighet = stopwatch.elapsed;
+    if (localStorage['forsteTid'] == null) {
+      return true;
+    } else if (localStorage['forsteTid'] != null && varighet.inSeconds < int.parse(localStorage['forsteTid'])) {
+      return true;
+    } else if (localStorage['andreTid'] == null) {
+      return true;
+    } else if (localStorage['andreTid'] != null && varighet.inSeconds < int.parse(localStorage['andreTid'])) {
+      return true;
+    } else if (localStorage['tredjeTid'] == null) {
+      return true;
+    } else if (localStorage['tredjeTid'] != null && varighet.inSeconds < int.parse(localStorage['tredjeTid'])) {
+      return true;
+    }
+
+    return false;
+  }
+
+  void visHighscoreLista() {
+    if (localStorage['forsteTid'] != null) {
+      LIElement forste = querySelector('#forste');
+      forste.text = localStorage['forsteNavn'] + " - " + localStorage['forsteTid'] + "s";
+    }
+
+    if (localStorage['andreTid'] != null) {
+      LIElement andre = querySelector('#andre');
+      andre.text = localStorage['andreNavn'] + " - " + localStorage['andreTid'] + "s";
+    }
+
+    if (localStorage['tredjeTid'] != null) {
+      LIElement tredje = querySelector('#tredje');
+      tredje.text = localStorage['tredjeNavn'] + " - " + localStorage['tredjeTid'] + "s";
+    }
+
+    seier.style.display = "block";
+
   }
 
   void victory() {
@@ -173,9 +221,20 @@ void main() {
     }
 
     timer.cancel();
+    stopwatch.stop();
 
+    if (spillerenSkalPaaHighscoreLista()) {
+      personalia.style.display = "block";
 
-    haandtereHighscoreLista();
+      InputElement navn = querySelector('#navn');
+      InputElement lagre = querySelector('#lagre');
+
+      lagre.onClick.listen((Event e) {
+        haandtereHighscoreLista(navn.value);
+      });
+    } else {
+      visHighscoreLista();
+    }
   }
 
   void fjernBrick(row, col) {
