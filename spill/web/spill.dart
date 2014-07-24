@@ -46,7 +46,7 @@ void main() {
   paddleh = 10;
   paddlew = 75;
 
-  NROWS = 1;
+  NROWS = 2;
   NCOLS = 1;
   BRICKWIDTH = (WIDTH / NCOLS) - 1;
   BRICKHEIGHT = 15;
@@ -124,20 +124,41 @@ void main() {
   void haandtereHighscoreLista() {
     stopwatch.stop();
     Duration varighet = stopwatch.elapsed;
-
     Storage localStorage = window.localStorage;
 
-    localStorage['forsteNavn'] = "Anders Hefre";
-    localStorage['forsteTid'] = varighet.inSeconds.toString();
-
-    String forstePlass = localStorage['forste'];
     String forsteTid = localStorage['forsteTid'];
-    print(forstePlass);
-    print(forsteTid);
+    String andreTid = localStorage['andreTid'];
+    String tredjeTid = localStorage['tredjeTid'];
 
-    LIElement forste = querySelector('#forste');
-    forste.text = forstePlass + " - " + forsteTid + "s";
-    
+    if (forsteTid == null) {
+      localStorage['forsteTid'] = varighet.inSeconds.toString();
+    } else if (forsteTid != null && varighet.inSeconds < int.parse(forsteTid)) {
+      localStorage['forsteTid'] = varighet.inSeconds.toString();
+    } else if (andreTid == null) {
+      localStorage['andreTid'] = varighet.inSeconds.toString();
+    } else if (andreTid != null && varighet.inSeconds < int.parse(andreTid)) {
+      localStorage['andreTid'] = varighet.inSeconds.toString();
+    } else if (tredjeTid == null) {
+      localStorage['tredjeTid'] = varighet.inSeconds.toString();
+    } else if (tredjeTid != null && varighet.inSeconds < int.parse(tredjeTid)) {
+      localStorage['tredjeTid'] = varighet.inSeconds.toString();
+    }
+
+    if (localStorage['forsteTid'] != null) {
+      LIElement forste = querySelector('#forste');
+      forste.text = localStorage['forsteTid'] + "s";
+    }
+
+    if (localStorage['andreTid'] != null) {
+      LIElement andre = querySelector('#andre');
+      andre.text = localStorage['andreTid'] + "s";
+    }
+
+    if (localStorage['tredjeTid'] != null) {
+      LIElement tredje = querySelector('#tredje');
+      tredje.text = localStorage['tredjeTid'] + "s";
+    }
+
     seier.style.display = "block";
   }
 
