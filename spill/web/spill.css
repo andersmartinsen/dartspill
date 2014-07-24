@@ -1,3 +1,15 @@
-{ margin:0; padding:0; } /* to remove the top and left whitespace */
+#wrapper {
+    overflow: hidden; 
+}
+#game {
+    float: left;
+}
+#personalia {
+    padding-left: 10px;
+    overflow: hidden; 
+}
 
-canvas { display:block;  } /* To remove the scrollbars */
+#highscore {
+  padding-left: 10px;
+  overflow: hidden;
+}

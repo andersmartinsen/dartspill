@@ -7,24 +7,28 @@
   <link rel="stylesheet" type="text/css" href="spill.css">
  </head>
  <body>
- 
-    <canvas id="canvas" width="600" height="600">
-          Canvas is not supported in your browser.
-    </canvas>
     
-    <div id="personalia">
-      <h3>Gratulerer! Skriv inn navnet for å komme med på higscorelista</h3>
-      <input type="text" id="navn"></input>
-      <input type="button" id="lagre" value="Lagre"></input>
-    </div>
+    <div id="wrapper">
+      <div id="game">
+        <canvas id="canvas" width="600" height="600">
+              Canvas is not supported in your browser.
+        </canvas>
+      </div>
     
-    <div id="highscore">
-      <h1>Highscore</h1>
-      <ol>
-        <li id="forste"></li>
-        <li id="andre"></li>
-        <li id="tredje"></li>
-      </ol>
+      <div id="personalia">
+        <h3>Gratulerer! Skriv inn navnet for å komme med på highscorelista</h3>
+        <input type="text" id="navn"></input>
+        <input type="button" id="lagre" value="Lagre"></input>
+      </div>
+      
+      <div id="highscore">
+        <h1>Highscore</h1>
+        <ol>
+          <li id="forste"></li>
+          <li id="andre"></li>
+          <li id="tredje"></li>
+        </ol>
+      </div>
     </div>
     
     <audio src="lyd/boom.wav" id="treff"></audio>

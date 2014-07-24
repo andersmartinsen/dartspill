@@ -50,7 +50,7 @@ void main() {
   paddleh = 10;
   paddlew = 75;
 
-  NROWS = 2;
+  NROWS = 1;
   NCOLS = 1;
   BRICKWIDTH = (WIDTH / NCOLS) - 1;
   BRICKHEIGHT = 15;
@@ -230,6 +230,7 @@ void main() {
       InputElement lagre = querySelector('#lagre');
 
       lagre.onClick.listen((Event e) {
+        personalia.style.display = "none";
         haandtereHighscoreLista(navn.value);
       });
     } else {
