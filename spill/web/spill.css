@@ -4,12 +4,7 @@
 #game {
     float: left;
 }
-#personalia {
+#personalia, #highscore, #kontroll {
     padding-left: 10px;
     overflow: hidden; 
-}
-
-#highscore {
-  padding-left: 10px;
-  overflow: hidden;
 }

@@ -2,7 +2,6 @@ import 'dart:html';
 import 'dart:math';
 import 'dart:async';
 
-
 void main() {
   const hastighet = 10;
   var x = 150;
@@ -29,10 +28,10 @@ void main() {
   MediaElement treff;
   Stopwatch stopwatch = new Stopwatch()..start();
   Storage localStorage = window.localStorage;
+  InputElement start = querySelector("#start");
 
   DivElement seier = querySelector("#highscore");
   seier.style.display = "none";
-
   DivElement personalia = querySelector("#personalia");
   personalia.style.display = "none";
 
@@ -42,6 +41,7 @@ void main() {
   WIDTH = ctx.canvas.height;
   HEIGHT = ctx.canvas.height;
 
+  // Svart bakgrunn på spillet
   ctx.rect(0, 0, WIDTH, HEIGHT);
   ctx.fillStyle = "black";
   ctx.fill();
@@ -244,6 +244,8 @@ void main() {
     } else {
       visHighscoreLista();
     }
+    
+    start.style.display = "block";
   }
 
   void fjernBrick(row, col) {
@@ -264,6 +266,7 @@ void main() {
     ctx.font = 'italic 40pt Calibri';
     ctx.fillText('Game over', 185, 300);
     timer.cancel();
+    start.style.display = "block";
   }
 
   void tegnBall() {
@@ -321,5 +324,15 @@ void main() {
     y += dy;
   }
 
-  timer = new Timer.periodic(const Duration(milliseconds: hastighet), (t) => draw());
+  void startspill() {
+    main();
+    timer = new Timer.periodic(const Duration(milliseconds: hastighet), (t) => draw());
+  }
+
+  start.onClick.listen((Event e) {
+    startspill();
+    start.style.display = "none";
+  });
+
+  //timer = new Timer.periodic(const Duration(milliseconds: hastighet), (t) => draw());
 }
