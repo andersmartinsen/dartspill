@@ -28,8 +28,10 @@ void main() {
   var rowcolors = ["#FF1C0A", "#FFFD0A", "#00A308", "#0008DB", "#EB0093"];
   MediaElement treff;
   Stopwatch stopwatch = new Stopwatch()..start();
-  
-  
+
+  DivElement seier = querySelector("#highscore");
+  seier.style.display = "none";
+
   CanvasElement canvas = querySelector("#canvas");
   ctx = canvas.getContext('2d');
 
@@ -44,8 +46,8 @@ void main() {
   paddleh = 10;
   paddlew = 75;
 
-  NROWS = 5;
-  NCOLS = 5;
+  NROWS = 1;
+  NCOLS = 1;
   BRICKWIDTH = (WIDTH / NCOLS) - 1;
   BRICKHEIGHT = 15;
   PADDING = 1;
@@ -115,8 +117,28 @@ void main() {
         }
       }
     }
-    
+
     return true;
+  }
+
+  void haandtereHighscoreLista() {
+    stopwatch.stop();
+    Duration varighet = stopwatch.elapsed;
+
+    Storage localStorage = window.localStorage;
+
+    localStorage['forsteNavn'] = "Anders Hefre";
+    localStorage['forsteTid'] = varighet.inSeconds.toString();
+
+    String forstePlass = localStorage['forste'];
+    String forsteTid = localStorage['forsteTid'];
+    print(forstePlass);
+    print(forsteTid);
+
+    LIElement forste = querySelector('#forste');
+    forste.text = forstePlass + " - " + forsteTid + "s";
+    
+    seier.style.display = "block";
   }
 
   void victory() {
@@ -130,8 +152,9 @@ void main() {
     }
 
     timer.cancel();
-    stopwatch.stop();
-    print(stopwatch.elapsed);
+
+
+    haandtereHighscoreLista();
   }
 
   void fjernBrick(row, col) {
