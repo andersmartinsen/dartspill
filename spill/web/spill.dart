@@ -26,7 +26,10 @@ void main() {
   var rightDown = false;
   var leftDown = false;
   var rowcolors = ["#FF1C0A", "#FFFD0A", "#00A308", "#0008DB", "#EB0093"];
-
+  MediaElement treff;
+  Stopwatch stopwatch = new Stopwatch()..start();
+  
+  
   CanvasElement canvas = querySelector("#canvas");
   ctx = canvas.getContext('2d');
 
@@ -88,7 +91,6 @@ void main() {
   bool brickHit(row, col) {
     var brick = bricks[row];
     if (brick[col] == 1) {
-      MediaElement treff = querySelector("#treff");
       if (treff != null) {
         treff.play();
       }
@@ -128,6 +130,8 @@ void main() {
     }
 
     timer.cancel();
+    stopwatch.stop();
+    print(stopwatch.elapsed);
   }
 
   void fjernBrick(row, col) {
