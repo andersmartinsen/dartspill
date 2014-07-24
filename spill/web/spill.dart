@@ -220,8 +220,8 @@ void main() {
       seier.play();
     }
 
-    timer.cancel();
     stopwatch.stop();
+    timer.cancel();
 
     if (spillerenSkalPaaHighscoreLista()) {
       personalia.style.display = "block";
@@ -233,6 +233,14 @@ void main() {
         personalia.style.display = "none";
         haandtereHighscoreLista(navn.value);
       });
+
+      navn.onKeyUp.listen((evt) {
+        if (evt.keyCode == KeyCode.ENTER) {
+          personalia.style.display = "none";
+          haandtereHighscoreLista(navn.value);
+        }
+      });
+
     } else {
       visHighscoreLista();
     }
