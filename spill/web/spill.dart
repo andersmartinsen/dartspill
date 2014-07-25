@@ -2,32 +2,41 @@ import 'dart:html';
 import 'dart:math';
 import 'dart:async';
 
-class Board {
-
-
-}
-
-class Ball {
-
-}
-
 class Highscore {
   Storage localStorage = window.localStorage;
-  DivElement seier;
+  DivElement seier, personalia;
   InputElement nullstillHighscore;
   Tidtaking tidtaking;
 
   Highscore() {
     tidtaking = new Tidtaking();
-    init();
+    tidtaking.start();
+    personalia = querySelector("#personalia");
+    seier = querySelector("#highscore");
   }
 
-  void init() {
-    seier = querySelector("#highscore");
-    seier.style.display = "none";
+  void vedseier() {
+    if (spillerenSkalPaaHighscoreLista()) {
+      personalia.style.display = "block";
 
-    nullstillHighscore = querySelector("#clear");
-    nullstillHighscore.style.display = "none";
+      InputElement navn = querySelector('#navn');
+      InputElement lagre = querySelector('#lagre');
+
+      lagre.onClick.listen((Event e) {
+        personalia.style.display = "none";
+        haandtereHighscoreLista(navn.value);
+      });
+
+      navn.onKeyUp.listen((evt) {
+        if (evt.keyCode == KeyCode.ENTER) {
+          personalia.style.display = "none";
+          haandtereHighscoreLista(navn.value);
+        }
+      });
+
+    } else {
+      visHighscoreLista();
+    }
   }
 
   void nullstillHtmlLista() {
@@ -57,7 +66,7 @@ class Highscore {
 
     seier.style.display = "block";
 
-    InputElement clear = querySelector("clear");
+    InputElement nullstillHighscore = querySelector("#clear");
     nullstillHighscore.onClick.listen((evt) {
       localStorage.clear();
       nullstillHtmlLista();
@@ -138,103 +147,119 @@ class Tidtaking {
   }
 }
 
-
-void main() {
-  const hastighet = 10;
+class Brett {
+  var ctx;
+  var width;
+  var height;
   var x = 150;
   var y = 150;
   var dx = 2;
   var dy = 4;
-  var ctx;
-  var WIDTH;
-  var HEIGHT;
   var paddlex;
   var paddleh;
   var paddlew;
   var timer;
   var bricks;
-  var NROWS;
-  var NCOLS;
+  var nrows = 1;
+  var ncols = 1;
   var BRICKWIDTH;
   var BRICKHEIGHT;
   var PADDING;
   var ballr = 10;
+  var rowcolors = ["#FF1C0A", "#FFFD0A", "#00A308", "#0008DB", "#EB0093"];
   var rightDown = false;
   var leftDown = false;
-  var rowcolors = ["#FF1C0A", "#FFFD0A", "#00A308", "#0008DB", "#EB0093"];
-  MediaElement treff;
+  var spill;
+  static const hastighet = 10;
+  var highscore;
+  var brett;
+  var start;
+  var seier;
+  var nullstill;
 
-  Highscore highscore = new Highscore();
+  Brett() {
+    CanvasElement canvas = querySelector("#canvas");
+    ctx = canvas.getContext('2d');
 
-  var startevent;
+    width = ctx.canvas.height;
+    height = ctx.canvas.height;
+    paddlex = width / 2;
+    paddleh = 10;
+    paddlew = 75;
 
-  InputElement start = querySelector("#start");
+    BRICKWIDTH = (width / ncols) - 1;
+    BRICKHEIGHT = 15;
+    PADDING = 1;
 
-  DivElement personalia = querySelector("#personalia");
-  personalia.style.display = "none";
+    highscore = new Highscore();
 
-  CanvasElement canvas = querySelector("#canvas");
-  ctx = canvas.getContext('2d');
-
-  WIDTH = ctx.canvas.height;
-  HEIGHT = ctx.canvas.height;
-
-  // Svart bakgrunn på spillet
-  ctx.rect(0, 0, WIDTH, HEIGHT);
-  ctx.fillStyle = "black";
-  ctx.fill();
-
-  paddlex = WIDTH / 2;
-  paddleh = 10;
-  paddlew = 75;
-
-  NROWS = 1;
-  NCOLS = 1;
-  BRICKWIDTH = (WIDTH / NCOLS) - 1;
-  BRICKHEIGHT = 15;
-  PADDING = 1;
-
-  bricks = new List(NROWS);
-  for (int i = 0; i < NROWS; i++) {
-    bricks[i] = new List<int>.filled(NCOLS, 1);
+    leggTilKeyboardListeners();
+    start = querySelector("#start");
+    seier = querySelector("#highscore");
+    nullstill = querySelector("#clear");
   }
 
-  void onKeyDown(evt) {
-    if (evt.keyCode == 39) rightDown = true; else if (evt.keyCode == 37) leftDown = true;
+  void leggTilKeyboardListeners() {
+    document.onKeyDown.listen(onKeyDown);
+    document.onKeyUp.listen(onKeyUp);
   }
 
-  void onKeyUp(evt) {
-    if (evt.keyCode == 39) rightDown = false; else if (evt.keyCode == 37) leftDown = false;
+  void draw() {
+    clear();
+    tegnBall();
+    flyttPadle();
+    initBrikker();
+
+    var rowheight = BRICKHEIGHT + PADDING;
+    var colwidth = BRICKWIDTH + PADDING;
+    var row = (y / rowheight).floor();
+    var col = (x / colwidth).floor();
+
+    // Sjekke om en brikke er truffet.
+    if (y < nrows * rowheight && row >= 0 && col >= 0 && brickHit(row, col)) {
+      dy = -dy;
+      fjernBrick(row, col);
+    }
+
+    if (x + dx + ballr > width || x + dx - ballr < 0) dx = -dx;
+
+    if (y + dy - ballr < 0) dy = -dy; else if (y + dy + ballr > height - paddleh) {
+      if (x > paddlex && x < paddlex + paddlew) {
+        dx = 8 * ((x - (paddlex + paddlew / 2)) / paddlew);
+        dy = -dy;
+      } else if (y + dy + ballr > height) {
+        gameOver();
+      }
+    }
+
+    x += dx;
+    y += dy;
   }
 
-  document.onKeyDown.listen(onKeyDown);
-  document.onKeyUp.listen(onKeyUp);
-
-  void circle(x, y, r) {
-    ctx.beginPath();
-    ctx.arc(x, y, r, 0, PI * 2, true);
-    ctx.fillStyle = "white";
-    ctx.closePath();
-    ctx.fill();
+  void tegnBall() {
+    circle(x, y, 10);
   }
 
-  void rect(x, y, w, h) {
-    ctx.beginPath();
-    ctx.rect(x, y, w, h);
-    ctx.closePath();
-    ctx.fill();
-  }
+  void initBrikker() {
+    bricks = new List(nrows);
+    for (int i = 0; i < nrows; i++) {
+      bricks[i] = new List<int>.filled(ncols, 1);
+    }
 
-  void clear() {
-    ctx.clearRect(0, 0, WIDTH, HEIGHT);
-    rect(0, 0, WIDTH, HEIGHT);
-    ctx.fillStyle = "black";
-    ctx.fill();
+    for (int i = 0; i < nrows; i++) {
+      for (int j = 0; j < ncols; j++) {
+        if (skalBrikkenTegnes(i, j)) {
+          ctx.fillStyle = rowcolors[i];
+          rect((j * (BRICKWIDTH + PADDING)) + PADDING, (i * (BRICKHEIGHT + PADDING)) + PADDING, BRICKWIDTH, BRICKHEIGHT);
+        }
+      }
+    }
   }
 
   bool brickHit(row, col) {
     var brick = bricks[row];
     if (brick[col] == 1) {
+      MediaElement treff = querySelector("#treff");
       if (treff != null) {
         treff.play();
       }
@@ -251,9 +276,9 @@ void main() {
   }
 
   bool alleBrikkerFjernet() {
-    for (int i = 0; i < NROWS; i++) {
+    for (int i = 0; i < nrows; i++) {
       var rad = bricks[i];
-      for (int j = 0; j < NCOLS; j++) {
+      for (int j = 0; j < ncols; j++) {
         if (rad[j] == 1) {
           return false;
         }
@@ -261,6 +286,65 @@ void main() {
     }
 
     return true;
+  }
+
+  void fjernBrick(row, col) {
+    var brick = bricks[row];
+    brick[col] = 0;
+    if (alleBrikkerFjernet()) {
+      victory();
+    }
+  }
+
+  void onKeyDown(evt) {
+    if (evt.keyCode == 39) rightDown = true; else if (evt.keyCode == 37) leftDown = true;
+  }
+
+  void onKeyUp(evt) {
+    if (evt.keyCode == 39) rightDown = false; else if (evt.keyCode == 37) leftDown = false;
+  }
+
+  void flyttPadle() {
+    if (rightDown) {
+      paddlex += 5;
+    } else if (leftDown) {
+      paddlex -= 5;
+    }
+
+    rect(paddlex, height - paddleh, paddlew, paddleh);
+  }
+
+  void clear() {
+    ctx.clearRect(0, 0, width, height);
+    rect(0, 0, width, height);
+    ctx.fillStyle = "black";
+    ctx.fill();
+  }
+
+  void rect(x, y, w, h) {
+    ctx.beginPath();
+    ctx.rect(x, y, w, h);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  void circle(x, y, r) {
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, PI * 2, true);
+    ctx.fillStyle = "white";
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  void startspill() {
+    timer = new Timer.periodic(const Duration(milliseconds: hastighet), (t) => draw());
+    start.style.display = "none";
+    seier.style.display = "none";
+    nullstill.style.display = "none";
+  }
+
+  void stoppSpill() {
+    timer.cancel();
   }
 
   void victory() {
@@ -273,39 +357,10 @@ void main() {
       seier.play();
     }
 
-    timer.cancel();
-
-    if (highscore.spillerenSkalPaaHighscoreLista()) {
-      personalia.style.display = "block";
-
-      InputElement navn = querySelector('#navn');
-      InputElement lagre = querySelector('#lagre');
-
-      lagre.onClick.listen((Event e) {
-        personalia.style.display = "none";
-        highscore.haandtereHighscoreLista(navn.value);
-      });
-
-      navn.onKeyUp.listen((evt) {
-        if (evt.keyCode == KeyCode.ENTER) {
-          personalia.style.display = "none";
-          highscore.haandtereHighscoreLista(navn.value);
-        }
-      });
-
-    } else {
-      highscore.visHighscoreLista();
-    }
+    stoppSpill();
+    highscore.vedseier();
 
     start.style.display = "block";
-  }
-
-  void fjernBrick(row, col) {
-    var brick = bricks[row];
-    brick[col] = 0;
-    if (alleBrikkerFjernet()) {
-      victory();
-    }
   }
 
   void gameOver() {
@@ -317,75 +372,39 @@ void main() {
     ctx.fillStyle = "white";
     ctx.font = 'italic 40pt Calibri';
     ctx.fillText('Game over', 185, 300);
-    timer.cancel();
+    stoppSpill();
     start.style.display = "block";
   }
+}
 
-  void tegnBall() {
-    circle(x, y, 10);
+class Spill {
+
+  void initBrett() {
+    CanvasElement canvas = querySelector("#canvas");
+    var ctx = canvas.getContext('2d');
+    var width = ctx.canvas.height;
+    var height = ctx.canvas.height;
+    ctx.rect(0, 0, width, height);
+    ctx.fillStyle = "black";
+    ctx.fill();
+
+    var seier = querySelector("#highscore");
+    seier.style.display = "none";
+
+    var nullstillHighscore = querySelector("#clear");
+    nullstillHighscore.style.display = "none";
+
+    var personalia = querySelector("#personalia");
+    personalia.style.display = "none";
+
+    var start = querySelector("#start");
+    start.onClick.listen((evt) {
+      var brett = new Brett();
+      brett.startspill();
+    });
   }
+}
 
-  void initBrikker() {
-    for (int i = 0; i < NROWS; i++) {
-      for (int j = 0; j < NCOLS; j++) {
-        if (skalBrikkenTegnes(i, j)) {
-          ctx.fillStyle = rowcolors[i];
-          rect((j * (BRICKWIDTH + PADDING)) + PADDING, (i * (BRICKHEIGHT + PADDING)) + PADDING, BRICKWIDTH, BRICKHEIGHT);
-        }
-      }
-    }
-  }
-
-  void flyttPadle() {
-    if (rightDown) {
-      paddlex += 5;
-    } else if (leftDown) {
-      paddlex -= 5;
-    }
-
-    rect(paddlex, HEIGHT - paddleh, paddlew, paddleh);
-  }
-
-  void draw() {
-    clear();
-    tegnBall();
-    flyttPadle();
-    initBrikker();
-
-    var rowheight = BRICKHEIGHT + PADDING;
-    var colwidth = BRICKWIDTH + PADDING;
-    var row = (y / rowheight).floor();
-    var col = (x / colwidth).floor();
-
-    // Sjekke om en brikke er truffet.
-    if (y < NROWS * rowheight && row >= 0 && col >= 0 && brickHit(row, col)) {
-      dy = -dy;
-      fjernBrick(row, col);
-    }
-
-    if (x + dx + ballr > WIDTH || x + dx - ballr < 0) dx = -dx;
-
-    if (y + dy - ballr < 0) dy = -dy; else if (y + dy + ballr > HEIGHT - paddleh) {
-      if (x > paddlex && x < paddlex + paddlew) {
-        dx = 8 * ((x - (paddlex + paddlew / 2)) / paddlew);
-        dy = -dy;
-      } else if (y + dy + ballr > HEIGHT) gameOver();
-    }
-
-    x += dx;
-    y += dy;
-  }
-
-  void startspill() {
-    main();
-    timer = new Timer.periodic(const Duration(milliseconds: hastighet), (t) => draw());
-  }
-
-  start.onClick.listen((evt) {
-    startspill();
-    start.style.display = "none";
-  });
-
-
-  //timer = new Timer.periodic(const Duration(milliseconds: hastighet), (t) => draw());
+void main() {
+  new Spill()..initBrett();
 }
