@@ -3,34 +3,138 @@ import 'dart:math';
 import 'dart:async';
 
 class Board {
-  
-  
+
+
 }
 
 class Ball {
-  
+
 }
 
 class Highscore {
-  
+  Storage localStorage = window.localStorage;
+  DivElement seier;
+  InputElement nullstillHighscore;
+  Tidtaking tidtaking;
+
+  Highscore() {
+    tidtaking = new Tidtaking();
+    init();
+  }
+
+  void init() {
+    seier = querySelector("#highscore");
+    seier.style.display = "none";
+
+    nullstillHighscore = querySelector("#clear");
+    nullstillHighscore.style.display = "none";
+  }
+
+  void nullstillHtmlLista() {
+    LIElement forste = querySelector('#forste');
+    forste.text = "";
+    LIElement andre = querySelector('#andre');
+    andre.text = "";
+    LIElement tredje = querySelector('#tredje');
+    tredje.text = "";
+  }
+
+  void visHighscoreLista() {
+    if (localStorage['forsteTid'] != null) {
+      LIElement forste = querySelector('#forste');
+      forste.text = localStorage['forsteNavn'] + " - " + localStorage['forsteTid'] + "s";
+    }
+
+    if (localStorage['andreTid'] != null) {
+      LIElement andre = querySelector('#andre');
+      andre.text = localStorage['andreNavn'] + " - " + localStorage['andreTid'] + "s";
+    }
+
+    if (localStorage['tredjeTid'] != null) {
+      LIElement tredje = querySelector('#tredje');
+      tredje.text = localStorage['tredjeNavn'] + " - " + localStorage['tredjeTid'] + "s";
+    }
+
+    seier.style.display = "block";
+
+    InputElement clear = querySelector("clear");
+    nullstillHighscore.onClick.listen((evt) {
+      localStorage.clear();
+      nullstillHtmlLista();
+    });
+
+    nullstillHighscore.style.display = "block";
+  }
+
+  bool spillerenSkalPaaHighscoreLista() {
+    int varighet = tidtaking.bruktISekunder();
+    if (localStorage['forsteTid'] == null) {
+      return true;
+    } else if (localStorage['forsteTid'] != null && varighet < int.parse(localStorage['forsteTid'])) {
+      return true;
+    } else if (localStorage['andreTid'] == null) {
+      return true;
+    } else if (localStorage['andreTid'] != null && varighet < int.parse(localStorage['andreTid'])) {
+      return true;
+    } else if (localStorage['tredjeTid'] == null) {
+      return true;
+    } else if (localStorage['tredjeTid'] != null && varighet < int.parse(localStorage['tredjeTid'])) {
+      return true;
+    }
+
+    return false;
+  }
+
+  void haandtereHighscoreLista(String navn) {
+    int varighet = tidtaking.bruktISekunder();
+
+    String forsteTid = localStorage['forsteTid'];
+    String andreTid = localStorage['andreTid'];
+    String tredjeTid = localStorage['tredjeTid'];
+
+    if (forsteTid == null) {
+      localStorage['forsteTid'] = varighet.toString();
+      localStorage['forsteNavn'] = navn;
+    } else if (forsteTid != null && varighet < int.parse(forsteTid)) {
+      localStorage['forsteTid'] = varighet.toString();
+      localStorage['forsteNavn'] = navn;
+    } else if (andreTid == null) {
+      localStorage['andreTid'] = varighet.toString();
+      localStorage['andreNavn'] = navn;
+    } else if (andreTid != null && varighet < int.parse(andreTid)) {
+      localStorage['andreTid'] = varighet.toString();
+      localStorage['andreNavn'] = navn;
+    } else if (tredjeTid == null) {
+      localStorage['tredjeTid'] = varighet.toString();
+      localStorage['tredjeNavn'] = navn;
+    } else if (tredjeTid != null && varighet < int.parse(tredjeTid)) {
+      localStorage['tredjeTid'] = varighet.toString();
+      localStorage['tredjeNavn'] = navn;
+    }
+
+    visHighscoreLista();
+  }
 }
 
 class Tidtaking {
-  Stopwatch stopwatch; 
-  
+  Stopwatch stopwatch;
+
   void start() {
     stopwatch = new Stopwatch();
     stopwatch.start();
   }
-  
+
   void stopp() {
     if (stopwatch != null) {
       stopwatch.stop();
     }
   }
-  
+
   int bruktISekunder() {
-    return stopwatch.elapsed.inSeconds;
+    if (stopwatch != null) {
+      return stopwatch.elapsed.inSeconds;
+    }
+    return 0;
   }
 }
 
@@ -59,19 +163,13 @@ void main() {
   var leftDown = false;
   var rowcolors = ["#FF1C0A", "#FFFD0A", "#00A308", "#0008DB", "#EB0093"];
   MediaElement treff;
-  Tidtaking tidtaking = new Tidtaking();
-  tidtaking.start();
-  
-  Storage localStorage = window.localStorage;
+
+  Highscore highscore = new Highscore();
+
   var startevent;
 
   InputElement start = querySelector("#start");
 
-  InputElement nullstillHighscore = querySelector("#clear");
-  nullstillHighscore.style.display = "none";
-
-  DivElement seier = querySelector("#highscore");
-  seier.style.display = "none";
   DivElement personalia = querySelector("#personalia");
   personalia.style.display = "none";
 
@@ -165,91 +263,6 @@ void main() {
     return true;
   }
 
-  void nullstillHtmlLista() {
-    LIElement forste = querySelector('#forste');
-    forste.text = "";
-    LIElement andre = querySelector('#andre');
-    andre.text = "";
-    LIElement tredje = querySelector('#tredje');
-    tredje.text = "";
-  }
-
-  void visHighscoreLista() {
-    if (localStorage['forsteTid'] != null) {
-      LIElement forste = querySelector('#forste');
-      forste.text = localStorage['forsteNavn'] + " - " + localStorage['forsteTid'] + "s";
-    }
-
-    if (localStorage['andreTid'] != null) {
-      LIElement andre = querySelector('#andre');
-      andre.text = localStorage['andreNavn'] + " - " + localStorage['andreTid'] + "s";
-    }
-
-    if (localStorage['tredjeTid'] != null) {
-      LIElement tredje = querySelector('#tredje');
-      tredje.text = localStorage['tredjeNavn'] + " - " + localStorage['tredjeTid'] + "s";
-    }
-
-    seier.style.display = "block";
-
-    InputElement clear = querySelector("clear");
-    nullstillHighscore.onClick.listen((evt) {
-      localStorage.clear();
-      nullstillHtmlLista();
-    });
-
-    nullstillHighscore.style.display = "block";
-  }
-
-  void haandtereHighscoreLista(String navn) {
-    int varighet = tidtaking.bruktISekunder();
-
-    String forsteTid = localStorage['forsteTid'];
-    String andreTid = localStorage['andreTid'];
-    String tredjeTid = localStorage['tredjeTid'];
-
-    if (forsteTid == null) {
-      localStorage['forsteTid'] = varighet.toString();
-      localStorage['forsteNavn'] = navn;
-    } else if (forsteTid != null && varighet < int.parse(forsteTid)) {
-      localStorage['forsteTid'] = varighet.toString();
-      localStorage['forsteNavn'] = navn;
-    } else if (andreTid == null) {
-      localStorage['andreTid'] = varighet.toString();
-      localStorage['andreNavn'] = navn;
-    } else if (andreTid != null && varighet < int.parse(andreTid)) {
-      localStorage['andreTid'] = varighet.toString();
-      localStorage['andreNavn'] = navn;
-    } else if (tredjeTid == null) {
-      localStorage['tredjeTid'] = varighet.toString();
-      localStorage['tredjeNavn'] = navn;
-    } else if (tredjeTid != null && varighet < int.parse(tredjeTid)) {
-      localStorage['tredjeTid'] = varighet.toString();
-      localStorage['tredjeNavn'] = navn;
-    }
-
-    visHighscoreLista();
-  }
-
-  bool spillerenSkalPaaHighscoreLista() {
-    int varighet = tidtaking.bruktISekunder();
-    if (localStorage['forsteTid'] == null) {
-      return true;
-    } else if (localStorage['forsteTid'] != null && varighet < int.parse(localStorage['forsteTid'])) {
-      return true;
-    } else if (localStorage['andreTid'] == null) {
-      return true;
-    } else if (localStorage['andreTid'] != null && varighet < int.parse(localStorage['andreTid'])) {
-      return true;
-    } else if (localStorage['tredjeTid'] == null) {
-      return true;
-    } else if (localStorage['tredjeTid'] != null && varighet < int.parse(localStorage['tredjeTid'])) {
-      return true;
-    }
-
-    return false;
-  }
-
   void victory() {
     ctx.fillStyle = "white";
     ctx.font = 'italic 40pt Calibri';
@@ -260,10 +273,9 @@ void main() {
       seier.play();
     }
 
-    tidtaking.stopp();
     timer.cancel();
 
-    if (spillerenSkalPaaHighscoreLista()) {
+    if (highscore.spillerenSkalPaaHighscoreLista()) {
       personalia.style.display = "block";
 
       InputElement navn = querySelector('#navn');
@@ -271,18 +283,18 @@ void main() {
 
       lagre.onClick.listen((Event e) {
         personalia.style.display = "none";
-        haandtereHighscoreLista(navn.value);
+        highscore.haandtereHighscoreLista(navn.value);
       });
 
       navn.onKeyUp.listen((evt) {
         if (evt.keyCode == KeyCode.ENTER) {
           personalia.style.display = "none";
-          haandtereHighscoreLista(navn.value);
+          highscore.haandtereHighscoreLista(navn.value);
         }
       });
 
     } else {
-      visHighscoreLista();
+      highscore.visHighscoreLista();
     }
 
     start.style.display = "block";
@@ -367,17 +379,13 @@ void main() {
   void startspill() {
     main();
     timer = new Timer.periodic(const Duration(milliseconds: hastighet), (t) => draw());
-    startevent.cancel();
   }
 
- 
-  startevent =  start.onClick.listen((evt) {
+  start.onClick.listen((evt) {
     startspill();
     start.style.display = "none";
   });
-  
-  
- 
+
 
   //timer = new Timer.periodic(const Duration(milliseconds: hastighet), (t) => draw());
 }
