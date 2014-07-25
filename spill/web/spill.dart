@@ -162,9 +162,9 @@ class Brett {
   var bricks;
   var nrows = 1;
   var ncols = 1;
-  var BRICKWIDTH;
-  var BRICKHEIGHT;
-  var PADDING;
+  var brickwidth;
+  var brickheight;
+  var padding;
   var ballr = 10;
   var rowcolors = ["#FF1C0A", "#FFFD0A", "#00A308", "#0008DB", "#EB0093"];
   var rightDown = false;
@@ -187,9 +187,9 @@ class Brett {
     paddleh = 10;
     paddlew = 75;
 
-    BRICKWIDTH = (width / ncols) - 1;
-    BRICKHEIGHT = 15;
-    PADDING = 1;
+    brickwidth = (width / ncols) - 1;
+    brickheight = 15;
+    padding = 1;
 
     highscore = new Highscore();
 
@@ -210,8 +210,8 @@ class Brett {
     flyttPadle();
     initBrikker();
 
-    var rowheight = BRICKHEIGHT + PADDING;
-    var colwidth = BRICKWIDTH + PADDING;
+    var rowheight = brickheight + padding;
+    var colwidth = brickwidth + padding;
     var row = (y / rowheight).floor();
     var col = (x / colwidth).floor();
 
@@ -250,7 +250,7 @@ class Brett {
       for (int j = 0; j < ncols; j++) {
         if (skalBrikkenTegnes(i, j)) {
           ctx.fillStyle = rowcolors[i];
-          rect((j * (BRICKWIDTH + PADDING)) + PADDING, (i * (BRICKHEIGHT + PADDING)) + PADDING, BRICKWIDTH, BRICKHEIGHT);
+          rect((j * (brickwidth + padding)) + padding, (i * (brickheight + padding)) + padding, brickwidth, brickheight);
         }
       }
     }
@@ -384,6 +384,7 @@ class Spill {
     var ctx = canvas.getContext('2d');
     var width = ctx.canvas.height;
     var height = ctx.canvas.height;
+    
     ctx.rect(0, 0, width, height);
     ctx.fillStyle = "black";
     ctx.fill();
