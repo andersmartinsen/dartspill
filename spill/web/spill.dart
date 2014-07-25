@@ -176,6 +176,7 @@ class Brett {
   var start;
   var seier;
   var nullstill;
+  var personalia;
 
   Brett() {
     CanvasElement canvas = querySelector("#canvas");
@@ -194,9 +195,7 @@ class Brett {
     highscore = new Highscore();
 
     leggTilKeyboardListeners();
-    start = querySelector("#start");
-    seier = querySelector("#highscore");
-    nullstill = querySelector("#clear");
+    gjemHtmlElementer();
   }
 
   void leggTilKeyboardListeners() {
@@ -260,9 +259,8 @@ class Brett {
     var brick = bricks[row];
     if (brick[col] == 1) {
       MediaElement treff = querySelector("#treff");
-      if (treff != null) {
-        treff.play();
-      }
+      treff.currentTime = 0;
+      treff.play();
 
       return true;
     }
@@ -338,9 +336,18 @@ class Brett {
 
   void startspill() {
     timer = new Timer.periodic(const Duration(milliseconds: hastighet), (t) => draw());
+
+  }
+
+  void gjemHtmlElementer() {
+    start = querySelector("#start");
+    seier = querySelector("#highscore");
+    nullstill = querySelector("#clear");
+    personalia = querySelector("#personalia");
     start.style.display = "none";
     seier.style.display = "none";
     nullstill.style.display = "none";
+    personalia.style.display = "none";
   }
 
   void stoppSpill() {
@@ -384,13 +391,13 @@ class Spill {
     var ctx = canvas.getContext('2d');
     var width = ctx.canvas.height;
     var height = ctx.canvas.height;
-    
+
     ctx.rect(0, 0, width, height);
     ctx.fillStyle = "black";
     ctx.fill();
 
-    var seier = querySelector("#highscore");
-    seier.style.display = "none";
+    var highscore = querySelector("#highscore");
+    highscore.style.display = "none";
 
     var nullstillHighscore = querySelector("#clear");
     nullstillHighscore.style.display = "none";
