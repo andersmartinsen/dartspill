@@ -258,7 +258,7 @@ class Brett {
   bool brickHit(row, col) {
     var brick = bricks[row];
     if (brick[col] == 1) {
-      MediaElement treff = querySelector("#treff");
+      AudioElement treff = querySelector("#treff");
       treff.currentTime = 0;
       treff.play();
 
@@ -372,9 +372,8 @@ class Brett {
 
   void gameOver() {
     MediaElement gameover = querySelector("#gameover");
-    if (gameover != null) {
-      gameover.play();
-    }
+    gameover.currentTime = 0;
+    gameover.play();
 
     ctx.fillStyle = "white";
     ctx.font = 'italic 40pt Calibri';
