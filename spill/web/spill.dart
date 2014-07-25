@@ -16,6 +16,7 @@ class Highscore {
   }
 
   void vedseier() {
+    tidtaking.stopp();
     if (spillerenSkalPaaHighscoreLista()) {
       personalia.style.display = "block";
 
@@ -360,11 +361,11 @@ class Brett {
     ctx.fillText('Victory', 215, 300);
 
     MediaElement seier = querySelector("#seier");
-    if (seier != null) {
-      seier.play();
-    }
+    seier.currentTime = 0;
+    seier.play();
 
     stoppSpill();
+    
     highscore.vedseier();
 
     start.style.display = "block";
