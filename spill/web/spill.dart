@@ -10,7 +10,7 @@ part 'brett.dart';
 
 class Spill {
   
-  void initBrett() {
+  void init() {
     CanvasElement canvas = querySelector("#canvas");
     var ctx = canvas.getContext('2d');
     var width = ctx.canvas.height;
@@ -38,5 +38,5 @@ class Spill {
 }
 
 void main() {
-  new Spill()..initBrett();
+  new Spill()..init();
 }
