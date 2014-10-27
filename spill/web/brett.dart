@@ -1,28 +1,29 @@
 part of spill;
 
 class Brett {
-  var nrows = 5;
-  var ncols = 5;
+  var nrows = 2;
+  var ncols = 2;
   static const hastighet = 5;
-  var ctx;
-  var width;
-  var height;
+  var rowcolors = ["#FF1C0A", "#FFFD0A", "#00A308", "#0008DB", "#EB0093"];
+  var paddleh = 10;
+  var paddlew = 75;
   var x = 150;
   var y = 150;
   var dx = 2;
   var dy = 4;
+  var brickheight = 15;
+  var padding = 1;
+  var ballr = 10;
+  var rightDown = false;
+  var leftDown = false;
+  var brikkerInitializert = false;
+  var ctx;
+  var width;
+  var height;
   var paddlex;
-  var paddleh;
-  var paddlew;
   var timer;
   var bricks;
   var brickwidth;
-  var brickheight;
-  var padding;
-  var ballr = 10;
-  var rowcolors = ["#FF1C0A", "#FFFD0A", "#00A308", "#0008DB", "#EB0093"];
-  var rightDown = false;
-  var leftDown = false;
   var spill;
   var highscore;
   var brett;
@@ -30,7 +31,7 @@ class Brett {
   var seier;
   var nullstill;
   var personalia;
-  var brikkerTegnet = false;
+
 
   Brett() {
     CanvasElement canvas = querySelector("#canvas");
@@ -39,13 +40,9 @@ class Brett {
     width = ctx.canvas.height;
     height = ctx.canvas.height;
     paddlex = width / 2;
-    paddleh = 10;
-    paddlew = 75;
 
     brickwidth = (width / ncols) - 1;
-    brickheight = 15;
-    padding = 1;
-
+    
     highscore = new Highscore();
 
     leggTilKeyboardListeners();
@@ -58,29 +55,22 @@ class Brett {
   }
 
   void draw() {
-    clear();
+    sjekkOmEnBrikkeErTruffet();
+    blankBrettet();
     tegnBall();
-    flyttPadle();
+    flyttOgTegnPadle();
     
-    if (!brikkerTegnet) {
+    if (!brikkerInitializert) {
       initBrikker();
     }
     
     tegnBrikker();
-    
-    var rowheight = brickheight + padding;
-    var colwidth = brickwidth + padding;
-    var row = (y / rowheight).floor();
-    var col = (x / colwidth).floor();
+    koordinerBallOgPadlesBevegelser();
+  }
 
-    // Sjekke om en brikke er truffet.
-    if (y < nrows * rowheight && row >= 0 && col >= 0 && brickHit(row, col)) {
-      dy = -dy;
-      fjernBrick(row, col);
-    }
-
+  void koordinerBallOgPadlesBevegelser() {
     if (x + dx + ballr > width || x + dx - ballr < 0) dx = -dx;
-
+    
     if (y + dy - ballr < 0) dy = -dy; else if (y + dy + ballr > height - paddleh) {
       if (x > paddlex && x < paddlex + paddlew) {
         dx = 8 * ((x - (paddlex + paddlew / 2)) / paddlew);
@@ -89,22 +79,35 @@ class Brett {
         gameOver();
       }
     }
-
+    
     x += dx;
     y += dy;
+  }
+
+  void sjekkOmEnBrikkeErTruffet() {
+    var rowheight = brickheight + padding;
+    var colwidth = brickwidth + padding;
+    var row = (y / rowheight).floor();
+    var col = (x / colwidth).floor();
+    
+    // Sjekke om en brikke er truffet.
+    if (y < nrows * rowheight && row >= 0 && col >= 0 && brickHit(row, col)) {
+      dy = -dy;
+      fjernBrick(row, col);
+    }
   }
 
   void tegnBall() {
     circle(x, y, 10);
   }
 
-  bool initBrikker() {
+  void initBrikker() {
     bricks = new List(nrows);
     for (int i = 0; i < nrows; i++) {
       bricks[i] = new List<int>.filled(ncols, 1);
     }
     
-    brikkerTegnet = true;
+    brikkerInitializert = true;
   }
 
   void tegnBrikker() {
@@ -123,6 +126,7 @@ class Brett {
     if (brick[col] == 1) {
       AudioElement treff = querySelector("#treff");
       treff.currentTime = 0;
+      treff.load();
       treff.play();
 
       return true;
@@ -165,17 +169,18 @@ class Brett {
     if (evt.keyCode == 39) rightDown = false; else if (evt.keyCode == 37) leftDown = false;
   }
 
-  void flyttPadle() {
+  void flyttOgTegnPadle() {
     if (rightDown) {
       paddlex += 5;
     } else if (leftDown) {
       paddlex -= 5;
     }
-
+  
     rect(paddlex, height - paddleh, paddlew, paddleh);
+    
   }
 
-  void clear() {
+  void blankBrettet() {
     ctx.clearRect(0, 0, width, height);
     rect(0, 0, width, height);
     ctx.fillStyle = "black";
@@ -199,7 +204,6 @@ class Brett {
 
   void startspill() {
     timer = new Timer.periodic(const Duration(milliseconds: hastighet), (t) => draw());
-
   }
 
   void gjemHtmlElementer() {
@@ -224,6 +228,7 @@ class Brett {
 
     MediaElement seier = querySelector("#seier");
     seier.currentTime = 0;
+    seier.load();
     seier.play();
 
     stoppSpill();
@@ -236,7 +241,9 @@ class Brett {
   void gameOver() {
     MediaElement gameover = querySelector("#gameover");
     gameover.currentTime = 0;
+    gameover.load();
     gameover.play();
+    
 
     ctx.fillStyle = "white";
     ctx.font = 'italic 40pt Calibri';
@@ -244,30 +251,4 @@ class Brett {
     stoppSpill();
     start.style.display = "block";
   }
-  
-  void initBrett() {
-      CanvasElement canvas = querySelector("#canvas");
-      var ctx = canvas.getContext('2d');
-      var width = ctx.canvas.height;
-      var height = ctx.canvas.height;
-
-      ctx.rect(0, 0, width, height);
-      ctx.fillStyle = "black";
-      ctx.fill();
-
-      var highscore = querySelector("#highscore");
-      highscore.style.display = "none";
-
-      var nullstillHighscore = querySelector("#clear");
-      nullstillHighscore.style.display = "none";
-
-      var personalia = querySelector("#personalia");
-      personalia.style.display = "none";
-
-      var start = querySelector("#start");
-      start.onClick.listen((evt) {
-        var brett = new Brett();
-        brett.startspill();
-      });
-    }
 }
